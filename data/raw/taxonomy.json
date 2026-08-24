@@ -1,0 +1,29 @@
+{
+  "swc": {
+    "SWC-101": {"title": "Integer Overflow and Underflow", "cwe": "CWE-682", "summary": "Arithmetic that wraps because it is performed in an unchecked block, in Solidity below 0.8, or through an unsafe cast to a narrower type."},
+    "SWC-104": {"title": "Unchecked Call Return Value", "cwe": "CWE-252", "summary": "The boolean or returndata of a low level call, send or non-standard ERC20 transfer is discarded, so a silent failure is treated as success."},
+    "SWC-105": {"title": "Unprotected Ether Withdrawal", "cwe": "CWE-284", "summary": "A state changing or value moving function is callable by any account because the authorisation check is missing or applied to the wrong role."},
+    "SWC-107": {"title": "Reentrancy", "cwe": "CWE-841", "summary": "An external call is made before the contract finishes updating its own state, letting the callee re-enter and observe or exploit the intermediate state."},
+    "SWC-112": {"title": "Delegatecall to Untrusted Callee", "cwe": "CWE-829", "summary": "delegatecall executes foreign code against local storage, so an untrusted or attacker chosen target can rewrite any slot including the admin and implementation slots."},
+    "SWC-113": {"title": "DoS with Failed Call", "cwe": "CWE-703", "summary": "A push payment to an untrusted recipient is required to succeed, so a recipient that reverts can block a state transition for everyone."},
+    "SWC-114": {"title": "Transaction Order Dependence", "cwe": "CWE-362", "summary": "The outcome depends on the ordering of transactions inside a block, which a searcher or builder can choose. Covers sandwich attacks and missing slippage bounds."},
+    "SWC-115": {"title": "Authorization through tx.origin", "cwe": "CWE-477", "summary": "Authorisation compares tx.origin instead of msg.sender, so any contract the authorised account is induced to call can act on its behalf."},
+    "SWC-117": {"title": "Signature Malleability", "cwe": "CWE-347", "summary": "ecrecover accepts a second valid encoding of the same signature with the s value in the upper half of the curve order, and returns address zero on malformed input."},
+    "SWC-120": {"title": "Weak Sources of Randomness", "cwe": "CWE-330", "summary": "Randomness is derived from block fields such as timestamp, prevrandao or blockhash, all of which the block builder can observe or influence before inclusion."},
+    "SWC-121": {"title": "Missing Protection against Signature Replay", "cwe": "CWE-347", "summary": "A signed message can be submitted more than once because the digest omits a nonce, a chain identifier or the verifying contract address."},
+    "SWC-128": {"title": "DoS With Block Gas Limit", "cwe": "CWE-400", "summary": "An unbounded loop over an array that any account can grow makes a function exceed the block gas limit and revert permanently."},
+    "SWC-000": {"title": "Protocol and Economic Logic", "cwe": "CWE-840", "summary": "Local catch-all used in this corpus for defects that are correct at the language level but violate a protocol invariant: oracle design, share accounting, rounding direction, incentive design and upgrade safety."}
+  },
+  "dasp": {
+    "DASP-1": {"title": "Reentrancy"},
+    "DASP-2": {"title": "Access Control"},
+    "DASP-3": {"title": "Arithmetic"},
+    "DASP-4": {"title": "Unchecked Low Level Calls"},
+    "DASP-5": {"title": "Denial of Service"},
+    "DASP-6": {"title": "Bad Randomness"},
+    "DASP-7": {"title": "Front Running"},
+    "DASP-8": {"title": "Time Manipulation"},
+    "DASP-9": {"title": "Short Address Attack"},
+    "DASP-10": {"title": "Unknown Unknowns"}
+  }
+}

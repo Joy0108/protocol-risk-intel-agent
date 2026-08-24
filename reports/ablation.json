@@ -1,0 +1,189 @@
+[
+  {
+    "config": "R01 bm25-only",
+    "ndcg@10": 0.8756,
+    "mrr": 0.8684,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.25,
+    "p95_ms": 0.4,
+    "vector_bytes": 0
+  },
+  {
+    "config": "R02 dense-only-hash",
+    "ndcg@10": 0.5575,
+    "mrr": 0.5706,
+    "recall@10": 0.6623,
+    "lexical_code_mrr": 0.5958,
+    "page_recall@1": 0.1667,
+    "p50_ms": 0.31,
+    "p95_ms": 0.5,
+    "vector_bytes": 50176
+  },
+  {
+    "config": "R03 dense-only-lsa",
+    "ndcg@10": 0.887,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.69,
+    "p95_ms": 0.8,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R04 linear a=0.3",
+    "ndcg@10": 0.8721,
+    "mrr": 0.8684,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.73,
+    "p95_ms": 1.31,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R05 linear a=0.5",
+    "ndcg@10": 0.8864,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.71,
+    "p95_ms": 1.12,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R06 linear a=0.7",
+    "ndcg@10": 0.8868,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.69,
+    "p95_ms": 0.86,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R07 rrf k=10",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.7,
+    "p95_ms": 1.1,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R08 rrf k=60",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.68,
+    "p95_ms": 0.82,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R09 rrf k=120",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.62,
+    "p95_ms": 0.81,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R10 rrf + metadata filter",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.75,
+    "p95_ms": 1.41,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R11 rrf + rerank",
+    "ndcg@10": 0.8837,
+    "mrr": 0.8947,
+    "recall@10": 0.8947,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 17.64,
+    "p95_ms": 21.21,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R12 rrf + filter + rerank",
+    "ndcg@10": 0.8837,
+    "mrr": 0.8947,
+    "recall@10": 0.8947,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 22.01,
+    "p95_ms": 37.76,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R13 rerank depth 20",
+    "ndcg@10": 0.8837,
+    "mrr": 0.8947,
+    "recall@10": 0.8947,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 10.22,
+    "p95_ms": 14.15,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R14 rerank depth 60",
+    "ndcg@10": 0.8837,
+    "mrr": 0.8947,
+    "recall@10": 0.8947,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 28.05,
+    "p95_ms": 46.5,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R15 + HyDE expansion",
+    "ndcg@10": 0.8529,
+    "mrr": 0.8684,
+    "recall@10": 0.8684,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 1.33,
+    "p95_ms": 1.67,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R16 + int8 quantization",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.95,
+    "p95_ms": 1.23,
+    "vector_bytes": 9898
+  },
+  {
+    "config": "R17 final (rrf + filter, quantized + cached)",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 1.55,
+    "p95_ms": 2.58,
+    "vector_bytes": 9898
+  }
+]

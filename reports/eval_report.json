@@ -1,0 +1,134 @@
+{
+  "config": {
+    "retrieval": {
+      "name": "final",
+      "use_bm25": true,
+      "bm25_k1": 1.2,
+      "bm25_b": 0.75,
+      "use_dense": true,
+      "embedder": "lsa",
+      "st_model": "BAAI/bge-small-en-v1.5",
+      "embed_dim": 128,
+      "query_prefix": "Represent this sentence for searching relevant passages: ",
+      "fusion": "rrf",
+      "rrf_k": 60,
+      "linear_alpha": 0.5,
+      "metadata_filter": true,
+      "rerank": false,
+      "rerank_backend": "feature",
+      "ce_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+      "rerank_depth": 40,
+      "use_hyde": false,
+      "quantize": true,
+      "semantic_cache": true,
+      "cache_threshold": 0.93,
+      "top_k": 10,
+      "candidate_k": 60
+    },
+    "agent": {
+      "max_critic_loops": 2,
+      "min_citation_rate": 0.9,
+      "require_citations": true,
+      "llm_backend": "deterministic",
+      "anthropic_model": "claude-sonnet-5"
+    }
+  },
+  "corpus": {
+    "chunks": 98,
+    "docs": 73
+  },
+  "golden": {
+    "n": 25,
+    "frozen_at": "2024-08-02"
+  },
+  "retrieval": {
+    "n_questions": 19,
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "hit@3": 1.0,
+    "lexical_code_mrr": 0.875,
+    "by_archetype": {
+      "code_diagnostic": {
+        "n": 4,
+        "ndcg@10": 1.0,
+        "mrr": 1.0
+      },
+      "incident_lookup": {
+        "n": 4,
+        "ndcg@10": 0.8678,
+        "mrr": 0.875
+      },
+      "mitigation": {
+        "n": 4,
+        "ndcg@10": 0.7876,
+        "mrr": 0.75
+      },
+      "report_page": {
+        "n": 2,
+        "ndcg@10": 0.8984,
+        "mrr": 0.75
+      },
+      "vuln_pattern": {
+        "n": 5,
+        "ndcg@10": 0.8983,
+        "mrr": 1.0
+      }
+    }
+  },
+  "pages": {
+    "n_questions": 6,
+    "late_interaction_recall@1": 0.5,
+    "caption_baseline_recall@1": 0.8333,
+    "delta@1": -0.3333,
+    "late_interaction_recall@3": 1.0,
+    "caption_baseline_recall@3": 1.0,
+    "delta@3": 0.0,
+    "mean_page_words": 147.8,
+    "index": {
+      "pages": 12,
+      "blocks": 74,
+      "blocks_per_page": 6.17,
+      "dim": 73
+    }
+  },
+  "agent": {
+    "answerable": {
+      "n": 19,
+      "attribution_rate": 1.0,
+      "resolvable_citation_rate": 1.0,
+      "support_rate": 1.0,
+      "mean_critic_loops": 0.95,
+      "total_citations": 90
+    },
+    "adversarial": {
+      "n": 6,
+      "passed": 6,
+      "rate": 1.0,
+      "failures": []
+    }
+  },
+  "serving": {
+    "latency": {
+      "n": 40,
+      "p50_ms": 1.16,
+      "p95_ms": 1.48,
+      "mean_ms": 0.87,
+      "cache": {
+        "hits": 19,
+        "misses": 21,
+        "evictions": 0,
+        "hit_rate": 0.475,
+        "mean_hit_similarity": 1.0
+      }
+    },
+    "vectors": {
+      "vectors": 98,
+      "dim": 97,
+      "float32_bytes": 38024,
+      "stored_bytes": 9898,
+      "compression": 3.84,
+      "quantized": true
+    }
+  }
+}

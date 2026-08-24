@@ -1,0 +1,29 @@
+services:
+  pria:
+    build: .
+    environment:
+      # Point at the phoenix service below to export spans; unset means the
+      # local JSONL recorder in artifacts/spans.jsonl is the only sink.
+      PRIA_PHOENIX_ENDPOINT: http://phoenix:6006/v1/traces
+      PRIA_LLM: deterministic
+    volumes:
+      - ./reports:/app/reports
+      - ./artifacts:/app/artifacts
+    depends_on:
+      - phoenix
+    command: ["eval"]
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant-storage:/qdrant/storage
+
+volumes:
+  qdrant-storage:

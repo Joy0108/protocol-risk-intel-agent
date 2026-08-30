@@ -114,3 +114,70 @@ def test_hyde_expansion_is_a_documented_regression(chunks, golden):
     without = evaluate_retrieval(Retriever(chunks, DEFAULT_RETRIEVAL), golden)[1]["ndcg@10"]
     with_hyde = evaluate_retrieval(Retriever(chunks, replace(DEFAULT_RETRIEVAL, use_hyde=True)), golden)[1]["ndcg@10"]
     assert with_hyde < without
+
+
+# --- diversification and decomposition, both measured and both default off ---
+
+def test_mmr_trades_relevance_for_non_redundancy(chunks):
+    """The trade-off curve, asserted as a curve rather than a point.
+
+    Lower lambda must reduce redundancy. That is the only thing MMR promises;
+    whether the trade is worth taking is what the ablation decides, and on this
+    corpus it is not.
+    """
+    from pria.eval.run_eval import evaluate_retrieval, load_golden
+
+    golden = load_golden()
+    scores = {}
+    for lam in (0.5, 0.9):
+        cfg = DEFAULT_RETRIEVAL.variant(f"mmr{lam}", mmr=True, mmr_lambda=lam,
+                                        quantize=False, semantic_cache=False)
+        _rows, summary = evaluate_retrieval(Retriever(chunks, cfg), golden)
+        scores[lam] = summary
+    assert scores[0.5]["redundancy@10"] < scores[0.9]["redundancy@10"]
+    assert scores[0.5]["ndcg@10"] < scores[0.9]["ndcg@10"]
+
+
+def test_mmr_is_off_by_default_because_it_lost(chunks):
+    assert DEFAULT_RETRIEVAL.mmr is False
+    assert DEFAULT_RETRIEVAL.multi_query is False
+    assert DEFAULT_RETRIEVAL.contextual_chunks is False
+
+
+def test_decomposition_keeps_the_full_query_first():
+    """Decomposition may only add candidates, never replace the base ranking."""
+    from pria.index.expand import decompose
+
+    q = "How does a reentrancy attack drain a vault when the token implements ERC777 transfer hooks"
+    facets = decompose(q)
+    assert facets[0] == q
+    assert "ERC777" in facets                      # the identifier gets its own facet
+    assert len(facets) <= DEFAULT_RETRIEVAL.max_subqueries
+
+
+def test_decomposition_helps_the_multi_document_question_it_targets(chunks):
+    """G-12 wants two post-mortems and two findings from one sentence."""
+    from pria.eval.run_eval import evaluate_retrieval, load_golden
+
+    golden = load_golden()
+
+    def recall_for(qid, **over):
+        cfg = DEFAULT_RETRIEVAL.variant("p", quantize=False, semantic_cache=False, **over)
+        rows, _ = evaluate_retrieval(Retriever(chunks, cfg), golden)
+        return next(r["recall@10"] for r in rows if r["qid"] == qid)
+
+    assert recall_for("G-12", multi_query=True, max_subqueries=2) > recall_for("G-12", multi_query=False)
+
+
+def test_the_context_header_never_reaches_a_citation(chunks):
+    """Indexed text may carry a header; the quoted passage must not."""
+    from pria.index.hybrid import contextualise
+
+    cfg = DEFAULT_RETRIEVAL.variant("ctx", contextual_chunks=True, quantize=False, semantic_cache=False)
+    retriever = Retriever(chunks, cfg)
+    augmented = {c["chunk_id"]: c["text"] for c in contextualise(chunks)}
+    payload = retriever.search("reentrancy withdraw external call", top_k=5)
+    for result in payload["results"]:
+        original = retriever.by_id[result["chunk_id"]]["text"]
+        assert result["text"] == original
+        assert augmented[result["chunk_id"]] != original or not retriever.by_id[result["chunk_id"]].get("title")

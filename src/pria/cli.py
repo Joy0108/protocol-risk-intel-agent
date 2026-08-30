@@ -78,10 +78,12 @@ def cmd_ask(args) -> int:
     ensure_dirs()
     retriever = _retriever()
     with tracer(out_path=ARTIFACT_DIR / "spans.jsonl"):
-        state = run_question(retriever, args.question, cfg=DEFAULT_AGENT, corpus_root=RAW_DIR)
+        state = run_question(retriever, args.question, cfg=DEFAULT_AGENT, corpus_root=RAW_DIR,
+                             engine=getattr(args, "engine", "auto"))
     print(state.get("memo") or state.get("answer", ""))
     if args.trace:
-        print("\ngraph path: " + " -> ".join(state["_path"]))
+        print(f"\nengine: {state.get('_engine')}")
+        print("graph path: " + " -> ".join(state["_path"]))
     return 0
 
 
@@ -116,7 +118,9 @@ def cmd_ablate(args) -> int:
 def cmd_graph(args) -> int:
     from .agent.nodes import build_agent
 
-    print(build_agent(_retriever()).to_mermaid())
+    agent = build_agent(_retriever(), engine=getattr(args, "engine", "auto"))
+    print(f"%% engine: {agent.engine}")
+    print(agent.to_mermaid())
     return 0
 
 
@@ -155,6 +159,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("ask", help="run the full agent and print the memo")
     p.add_argument("question")
     p.add_argument("--trace", action="store_true")
+    p.add_argument("--engine", choices=["auto", "langgraph", "reference"], default="auto",
+                   help="execution engine; auto picks langgraph when installed")
     p.set_defaults(func=cmd_ask)
 
     p = sub.add_parser("eval", help="run the golden-set evaluation")
@@ -165,6 +171,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_ablate)
 
     p = sub.add_parser("graph", help="print the agent graph as mermaid")
+    p.add_argument("--engine", choices=["auto", "langgraph", "reference"], default="auto",
+                   help="execution engine; auto picks langgraph when installed")
     p.set_defaults(func=cmd_graph)
 
     p = sub.add_parser("analyze", help="run the Solidity pattern pass over one file")

@@ -25,6 +25,8 @@ from ..tracing import current
 from .bm25 import BM25Index, tokenize
 from .dense import DenseIndex
 from .embed import build_embedder
+from .expand import decompose, fuse_rankings
+from .mmr import mmr_select, redundancy_at_k
 from .multivector import CaptionIndex, MultiVectorIndex
 from .rerank import build_reranker
 
@@ -59,18 +61,59 @@ def linear_fusion(
     )
 
 
+def contextualise(chunks: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Prepend a deterministic context header to each chunk before indexing.
+
+    A chunk cut from an audit report keeps its words and loses its identity.
+    "The balance is updated after the external call" is the same sentence in a
+    high-severity reentrancy finding and in a low-severity note, and a query
+    naming the protocol or the severity has nothing to match against.
+
+    The header restates what the chunk *is* - document title, source, severity,
+    SWC class, tags - so those become searchable terms on the chunk itself.
+    This is the cheap, deterministic half of contextual retrieval: no model is
+    called, the header is a pure function of metadata already present, and the
+    index rebuild is the only cost. It is a config flag and an ablation row,
+    not an assumption.
+
+    Only the indexed text changes. ``_materialise`` still returns the original
+    chunk text, so a citation quotes the document rather than the header.
+    """
+    out = []
+    for chunk in chunks:
+        parts = [
+            str(chunk.get("title") or ""),
+            str(chunk.get("source") or ""),
+            f"severity {chunk['severity']}" if chunk.get("severity") else "",
+            f"swc {chunk['swc']}" if chunk.get("swc") else "",
+            " ".join(str(t) for t in chunk.get("tags", []) or []),
+        ]
+        header = " | ".join(p for p in parts if p)
+        record = dict(chunk)
+        record["text"] = f"{header}\n{chunk['text']}" if header else chunk["text"]
+        out.append(record)
+    return out
+
+
 class Retriever:
     def __init__(self, chunks: Sequence[dict[str, Any]], cfg: RetrievalConfig = DEFAULT_RETRIEVAL):
         self.cfg = cfg
         self.chunks = list(chunks)
         self.by_id = {c["chunk_id"]: c for c in self.chunks}
 
-        self.bm25 = BM25Index(k1=cfg.bm25_k1, b=cfg.bm25_b).build(self.chunks) if cfg.use_bm25 else None
+        # What actually gets indexed. A chunk cut out of a report loses the
+        # document identity that makes it findable - "the reentrancy one" is
+        # useless without knowing which protocol and which severity. The header
+        # is deterministic, so it costs an index rebuild and nothing at query
+        # time, and it is an ablation row rather than an assumption.
+        self.indexed = contextualise(self.chunks) if cfg.contextual_chunks else self.chunks
+
+        self.bm25 = BM25Index(k1=cfg.bm25_k1, b=cfg.bm25_b).build(self.indexed) if cfg.use_bm25 else None
 
         self.dense: DenseIndex | None = None
         if cfg.use_dense:
             embedder = build_embedder(cfg.embedder, cfg.embed_dim, cfg.st_model, cfg.query_prefix)
-            self.dense = DenseIndex(embedder, quantize=cfg.quantize).build(self.chunks)
+            self.dense = DenseIndex(embedder, quantize=cfg.quantize).build(self.indexed)
 
         idf = self._idf_table()
         self.reranker = build_reranker(cfg.rerank_backend, idf=idf, model_name=cfg.ce_model) if cfg.rerank else None
@@ -85,6 +128,7 @@ class Retriever:
         self._page_index: MultiVectorIndex | None = None
         self._caption_index: CaptionIndex | None = None
 
+        self._vector_cache: dict[str, np.ndarray] | None = None
         self.latencies_ms: list[float] = []
 
     # -- indexes -----------------------------------------------------------
@@ -155,8 +199,18 @@ class Retriever:
             if self.cfg.use_hyde:
                 effective_query = f"{query} {hyde_expansion(query)}"
 
-            lexical = self.bm25.search(effective_query, self.cfg.candidate_k, allowed) if self.bm25 else []
-            densehits = self.dense.search(effective_query, self.cfg.candidate_k, allowed) if self.dense else []
+            # One retrieval pass per facet. The full query is always facet
+            # zero, so decomposition can only add candidates it would otherwise
+            # have missed - it never replaces the single-query ranking.
+            facets = decompose(effective_query, self.cfg.max_subqueries) if self.cfg.multi_query else [effective_query]
+            lexical_runs, dense_runs = [], []
+            for facet in facets:
+                if self.bm25:
+                    lexical_runs.append(self.bm25.search(facet, self.cfg.candidate_k, allowed))
+                if self.dense:
+                    dense_runs.append(self.dense.search(facet, self.cfg.candidate_k, allowed))
+            lexical = fuse_rankings(lexical_runs, self.cfg.rrf_k) if len(lexical_runs) > 1 else (lexical_runs[0] if lexical_runs else [])
+            densehits = fuse_rankings(dense_runs, self.cfg.rrf_k) if len(dense_runs) > 1 else (dense_runs[0] if dense_runs else [])
 
             if self.cfg.fusion == "rrf":
                 fused = reciprocal_rank_fusion([r for r in (lexical, densehits) if r], k=self.cfg.rrf_k)
@@ -165,16 +219,32 @@ class Retriever:
             else:
                 fused = list(densehits or lexical)
 
-            depth = self.cfg.rerank_depth if self.reranker else top_k
+            # The pool MMR chooses from. Selecting k out of k is a reordering;
+            # diversification needs candidates the relevance ranking would have
+            # dropped, so the pool is oversampled whenever MMR is on.
+            if self.reranker is not None:
+                depth = self.cfg.rerank_depth
+            elif self.cfg.mmr:
+                depth = max(self.cfg.mmr_depth, top_k)
+            else:
+                depth = top_k
             candidates = [self._materialise(cid, score) for cid, score in fused[:depth] if cid in self.by_id]
 
             if self.reranker is not None:
-                results = self.reranker.rerank(query, candidates, top_k=top_k, explain=explain)
+                ranked = self.reranker.rerank(query, candidates, top_k=len(candidates), explain=explain)
             else:
-                results = candidates[:top_k]
+                ranked = candidates
+
+            # Diversify last, over the ranked pool. Doing it before reranking
+            # would diversify candidates the reranker was about to discard.
+            if self.cfg.mmr:
+                results = mmr_select(ranked, top_k, self.cfg.mmr_lambda, self._dense_vectors())
+            else:
+                results = ranked[:top_k]
 
             span["attributes"].update(
-                {"lexical": len(lexical), "dense": len(densehits), "fused": len(fused), "returned": len(results)}
+                {"lexical": len(lexical), "dense": len(densehits), "fused": len(fused),
+                 "facets": len(facets), "returned": len(results)}
             )
 
         payload = {
@@ -185,12 +255,22 @@ class Retriever:
             "config": self.cfg.name,
             "n_lexical": len(lexical),
             "n_dense": len(densehits),
+            "facets": facets,
+            "redundancy": redundancy_at_k(results, self._dense_vectors()),
         }
         if self.cache is not None and cache_vector is not None:
             self.cache.put(query, cache_vector, payload)
         payload["latency_ms"] = round((time.perf_counter() - started) * 1000, 3)
         self.latencies_ms.append(payload["latency_ms"])
         return payload
+
+    def _dense_vectors(self) -> dict[str, np.ndarray] | None:
+        """chunk_id -> embedding, for MMR's similarity term."""
+        if self.dense is None or self.dense.vectors is None:
+            return None
+        if self._vector_cache is None:
+            self._vector_cache = dict(zip(self.dense.ids, self.dense.vectors, strict=True))
+        return self._vector_cache
 
     def _materialise(self, chunk_id: str, score: float) -> dict[str, Any]:
         c = self.by_id[chunk_id]

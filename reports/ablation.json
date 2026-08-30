@@ -6,8 +6,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.25,
-    "p95_ms": 0.4,
+    "p50_ms": 3.62,
+    "p95_ms": 4.47,
+    "redundancy@10": 0.0653,
     "vector_bytes": 0
   },
   {
@@ -17,8 +18,9 @@
     "recall@10": 0.6623,
     "lexical_code_mrr": 0.5958,
     "page_recall@1": 0.1667,
-    "p50_ms": 0.31,
-    "p95_ms": 0.5,
+    "p50_ms": 0.48,
+    "p95_ms": 0.99,
+    "redundancy@10": 0.1145,
     "vector_bytes": 50176
   },
   {
@@ -28,8 +30,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.69,
-    "p95_ms": 0.8,
+    "p50_ms": 0.53,
+    "p95_ms": 0.81,
+    "redundancy@10": 0.0866,
     "vector_bytes": 38024
   },
   {
@@ -39,8 +42,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.73,
-    "p95_ms": 1.31,
+    "p50_ms": 0.88,
+    "p95_ms": 1.32,
+    "redundancy@10": 0.0877,
     "vector_bytes": 38024
   },
   {
@@ -50,8 +54,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.71,
-    "p95_ms": 1.12,
+    "p50_ms": 0.85,
+    "p95_ms": 1.17,
+    "redundancy@10": 0.0869,
     "vector_bytes": 38024
   },
   {
@@ -61,8 +66,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.69,
-    "p95_ms": 0.86,
+    "p50_ms": 0.88,
+    "p95_ms": 1.17,
+    "redundancy@10": 0.0868,
     "vector_bytes": 38024
   },
   {
@@ -72,8 +78,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.7,
-    "p95_ms": 1.1,
+    "p50_ms": 0.86,
+    "p95_ms": 1.27,
+    "redundancy@10": 0.0866,
     "vector_bytes": 38024
   },
   {
@@ -83,8 +90,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.68,
-    "p95_ms": 0.82,
+    "p50_ms": 0.84,
+    "p95_ms": 1.02,
+    "redundancy@10": 0.0866,
     "vector_bytes": 38024
   },
   {
@@ -94,8 +102,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.62,
-    "p95_ms": 0.81,
+    "p50_ms": 0.81,
+    "p95_ms": 1.01,
+    "redundancy@10": 0.0866,
     "vector_bytes": 38024
   },
   {
@@ -105,8 +114,9 @@
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.75,
-    "p95_ms": 1.41,
+    "p50_ms": 0.82,
+    "p95_ms": 0.98,
+    "redundancy@10": 0.1038,
     "vector_bytes": 38024
   },
   {
@@ -116,8 +126,9 @@
     "recall@10": 0.8947,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 17.64,
-    "p95_ms": 21.21,
+    "p50_ms": 17.42,
+    "p95_ms": 19.51,
+    "redundancy@10": 0.0881,
     "vector_bytes": 38024
   },
   {
@@ -127,8 +138,9 @@
     "recall@10": 0.8947,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 22.01,
-    "p95_ms": 37.76,
+    "p50_ms": 17.12,
+    "p95_ms": 19.28,
+    "redundancy@10": 0.1041,
     "vector_bytes": 38024
   },
   {
@@ -138,8 +150,9 @@
     "recall@10": 0.8947,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 10.22,
-    "p95_ms": 14.15,
+    "p50_ms": 9.46,
+    "p95_ms": 10.47,
+    "redundancy@10": 0.1041,
     "vector_bytes": 38024
   },
   {
@@ -149,41 +162,129 @@
     "recall@10": 0.8947,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 28.05,
-    "p95_ms": 46.5,
+    "p50_ms": 24.09,
+    "p95_ms": 26.62,
+    "redundancy@10": 0.1041,
     "vector_bytes": 38024
   },
   {
-    "config": "R15 + HyDE expansion",
+    "config": "R15 no contextual header",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.81,
+    "p95_ms": 0.94,
+    "redundancy@10": 0.1038,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R16 + contextual header",
+    "ndcg@10": 0.89,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 0.79,
+    "p95_ms": 1.15,
+    "redundancy@10": 0.1038,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R17 + mmr l=0.5",
+    "ndcg@10": 0.8163,
+    "mrr": 0.8382,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.8063,
+    "page_recall@1": 0.5,
+    "p50_ms": 1.67,
+    "p95_ms": 1.98,
+    "redundancy@10": 0.0844,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R18 + mmr l=0.7",
+    "ndcg@10": 0.8528,
+    "mrr": 0.8728,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.8542,
+    "page_recall@1": 0.5,
+    "p50_ms": 1.68,
+    "p95_ms": 2.01,
+    "redundancy@10": 0.0976,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R19 + mmr l=0.9",
+    "ndcg@10": 0.8858,
+    "mrr": 0.8947,
+    "recall@10": 0.9211,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 1.68,
+    "p95_ms": 1.88,
+    "redundancy@10": 0.1038,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R20 + multi-query k=2",
+    "ndcg@10": 0.8578,
+    "mrr": 0.8496,
+    "recall@10": 0.9167,
+    "lexical_code_mrr": 0.875,
+    "page_recall@1": 0.5,
+    "p50_ms": 1.2,
+    "p95_ms": 1.66,
+    "redundancy@10": 0.1086,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R21 + multi-query k=4",
+    "ndcg@10": 0.8359,
+    "mrr": 0.8333,
+    "recall@10": 0.8728,
+    "lexical_code_mrr": 0.8542,
+    "page_recall@1": 0.5,
+    "p50_ms": 1.41,
+    "p95_ms": 2.19,
+    "redundancy@10": 0.107,
+    "vector_bytes": 38024
+  },
+  {
+    "config": "R22 + HyDE expansion",
     "ndcg@10": 0.8529,
     "mrr": 0.8684,
     "recall@10": 0.8684,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 1.33,
-    "p95_ms": 1.67,
+    "p50_ms": 1.42,
+    "p95_ms": 1.69,
+    "redundancy@10": 0.1022,
     "vector_bytes": 38024
   },
   {
-    "config": "R16 + int8 quantization",
+    "config": "R23 + int8 quantization",
     "ndcg@10": 0.89,
     "mrr": 0.8947,
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 0.95,
-    "p95_ms": 1.23,
+    "p50_ms": 1.12,
+    "p95_ms": 1.66,
+    "redundancy@10": 0.1038,
     "vector_bytes": 9898
   },
   {
-    "config": "R17 final (rrf + filter, quantized + cached)",
+    "config": "R24 final (rrf + metadata filter, quantized + cached)",
     "ndcg@10": 0.89,
     "mrr": 0.8947,
     "recall@10": 0.9211,
     "lexical_code_mrr": 0.875,
     "page_recall@1": 0.5,
-    "p50_ms": 1.55,
-    "p95_ms": 2.58,
+    "p50_ms": 1.39,
+    "p95_ms": 1.78,
+    "redundancy@10": 0.1038,
     "vector_bytes": 9898
   }
 ]

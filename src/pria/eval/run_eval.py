@@ -85,6 +85,11 @@ def evaluate_retrieval(
                 "recall@10": recall_at_k(ranked, relevant, k),
                 "hit@3": hit_at_k(ranked, primary, 3),
                 "latency_ms": payload.get("latency_ms", 0.0),
+                # Mean pairwise similarity of the returned passages. A config
+                # that wins on relevance while handing back ten restatements of
+                # one finding has not produced better evidence, and no
+                # relevance metric will say so.
+                "redundancy@10": payload.get("redundancy", 0.0),
                 "n_primary": len(primary),
                 "top": ranked[:3],
             }
@@ -98,6 +103,7 @@ def evaluate_retrieval(
         "recall@10": round(mean(r["recall@10"] for r in rows), 4),
         "hit@3": round(mean(r["hit@3"] for r in rows), 4),
         "lexical_code_mrr": round(mean(r["mrr"] for r in lexical), 4),
+        "redundancy@10": round(mean(r["redundancy@10"] for r in rows), 4),
         "by_archetype": {},
     }
     for archetype in sorted({r["archetype"] for r in rows}):

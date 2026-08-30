@@ -51,7 +51,39 @@ class RetrievalConfig:
     ce_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     rerank_depth: int = 40
 
+    # --- diversification ---------------------------------------------------
+    # The corpus contains genuine near-duplicates on purpose (the same finding
+    # written up by two firms). Relevance ranking alone answers a question with
+    # ten restatements of one answer; MMR trades a little relevance for
+    # non-redundancy. lambda = 1.0 is exactly the relevance ordering.
+    # Default OFF after measurement: on a 59-document corpus whose first stage
+    # already returns recall@10 = 0.921, diversification only pushes relevant
+    # documents out. It is here, measured, for the corpus size where it pays.
+    mmr: bool = False
+    mmr_lambda: float = 0.7
+    # MMR must choose from more than it returns. Selecting k out of k is a
+    # reordering, not a diversification - the pool has to be oversampled.
+    mmr_depth: int = 30
+
+    # --- indexing ----------------------------------------------------------
+    # Prepend a deterministic context header (title, source, severity, SWC) to
+    # each chunk before indexing, so a chunk carries the document identity a
+    # window of raw text loses. Costs nothing at query time.
+    # Default OFF after measurement: neutral on relevance here (-0.0003 nDCG)
+    # because the corpus is small enough that chunks are already unambiguous.
+    contextual_chunks: bool = False
+
     # --- query expansion ---------------------------------------------------
+    # Decompose a compound question into facets, retrieve for each, fuse with
+    # RRF. The golden set's hardest questions want evidence from several
+    # documents at once, and a single embedding of the whole sentence lands
+    # between them.
+    # Default OFF after measurement: costs 0.054 nDCG@10 overall while helping
+    # exactly the multi-document questions it targets (G-12 recall 0.50 -> 0.75).
+    # The trade is bad at this corpus size and good at scale; see the README.
+    multi_query: bool = False
+    max_subqueries: int = 4
+
     use_hyde: bool = False  # removed after ablation: costs 0.061 nDCG@10
 
     # --- serving -----------------------------------------------------------

@@ -24,6 +24,40 @@ from ..solidity.ast_lite import extract_spans, summarise
 from .critic import CitationCritic
 from .graph import END, START, StateGraph
 from .grounding import EvidenceGate, abstention_text
+from .spec import AgentSpec, GraphError
+
+#: ``langgraph`` when installed, otherwise the dependency-free walker.
+#: ``PRIA_ENGINE`` pins it, which is what the conformance test uses to run the
+#: same question through both without rebuilding the topology.
+ENGINE_ENV = "PRIA_ENGINE"
+
+
+def select_engine(engine: str = "auto") -> str:
+    import os
+
+    from .langgraph_engine import langgraph_available
+
+    if engine == "auto":
+        engine = os.environ.get(ENGINE_ENV, "auto")
+    if engine == "auto":
+        return "langgraph" if langgraph_available() else "reference"
+    if engine not in {"langgraph", "reference"}:
+        raise GraphError(f"unknown engine {engine!r}; expected 'langgraph', 'reference' or 'auto'")
+    if engine == "langgraph" and not langgraph_available():
+        raise GraphError("engine='langgraph' requested but langgraph is not installed; pip install '.[graph]'")
+    return engine
+
+
+def compile_agent(spec: AgentSpec, engine: str = "auto", human_in_the_loop: bool = False):
+    """Turn a declared topology into something with ``.invoke``."""
+    resolved = select_engine(engine)
+    if resolved == "langgraph":
+        from .langgraph_engine import LangGraphAgent
+
+        return LangGraphAgent(spec, human_in_the_loop=human_in_the_loop)
+    if human_in_the_loop:
+        raise GraphError("the review gate needs a checkpointer; it is only available on the langgraph engine")
+    return StateGraph.from_spec(spec)
 
 _ARCHETYPE_HINTS = {
     "code_diagnostic": (r"\.sol\b", r"\bfunction\b", r"\bcontract\b", r"what is wrong with", r"identify the"),
@@ -62,7 +96,9 @@ def build_agent(
     synthesizer: Synthesizer | None = None,
     cfg: AgentConfig = DEFAULT_AGENT,
     corpus_root: Any = None,
-) -> StateGraph:
+    engine: str = "auto",
+    human_in_the_loop: bool = False,
+):
     synth = synthesizer or build_synthesizer(cfg.llm_backend, cfg.anthropic_model)
     critic = CitationCritic()
     vocabulary = {t for chunk in retriever.chunks for t in tokenize(chunk["text"])}
@@ -175,7 +211,10 @@ def build_agent(
         return {"memo": _render_memo(state)}
 
     # -- graph -------------------------------------------------------------
-    graph = StateGraph("protocol-risk-agent", max_steps=24)
+    # Declared once here and compiled by whichever engine is selected.
+    # max_steps doubles as LangGraph's recursion_limit, so the
+    # synthesise/critic cycle is bounded identically under both.
+    graph = AgentSpec("protocol-risk-agent", max_steps=24)
     for name, fn in (
         ("guard", guard),
         ("refuse", refuse),
@@ -213,7 +252,7 @@ def build_agent(
         {"revise": "synthesise", "done": "finalise"},
     )
     graph.add_edge("finalise", END)
-    return graph
+    return compile_agent(graph, engine=engine, human_in_the_loop=human_in_the_loop)
 
 
 def _resolve_source(passage: dict[str, Any], corpus_root) -> Any:
@@ -280,6 +319,7 @@ def run_question(
     synthesizer: Synthesizer | None = None,
     corpus_root: Any = None,
     filters: dict[str, Any] | None = None,
+    engine: str = "auto",
 ) -> dict[str, Any]:
-    graph = build_agent(retriever, synthesizer=synthesizer, cfg=cfg, corpus_root=corpus_root)
+    graph = build_agent(retriever, synthesizer=synthesizer, cfg=cfg, corpus_root=corpus_root, engine=engine)
     return graph.invoke({"question": question, "filters": filters})

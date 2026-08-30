@@ -7,7 +7,8 @@
       "mrr": 1.0,
       "recall@10": 0.3333333333333333,
       "hit@3": 1.0,
-      "latency_ms": 1.577,
+      "latency_ms": 1.999,
+      "redundancy@10": 0.1407,
       "n_primary": 1,
       "top": [
         "c4r-0001",
@@ -22,7 +23,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.447,
+      "latency_ms": 3.194,
+      "redundancy@10": 0.0863,
       "n_primary": 2,
       "top": [
         "c4r-0016",
@@ -37,7 +39,8 @@
       "mrr": 1.0,
       "recall@10": 0.6666666666666666,
       "hit@3": 1.0,
-      "latency_ms": 1.245,
+      "latency_ms": 1.532,
+      "redundancy@10": 0.0914,
       "n_primary": 1,
       "top": [
         "c4r-0005",
@@ -52,7 +55,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.169,
+      "latency_ms": 1.407,
+      "redundancy@10": 0.0567,
       "n_primary": 2,
       "top": [
         "c4r-0013",
@@ -67,7 +71,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.239,
+      "latency_ms": 1.43,
+      "redundancy@10": 0.1461,
       "n_primary": 1,
       "top": [
         "c4r-0010",
@@ -82,7 +87,8 @@
       "mrr": 0.5,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.245,
+      "latency_ms": 1.411,
+      "redundancy@10": 0.0773,
       "n_primary": 2,
       "top": [
         "sol-LendingOracle.sol",
@@ -97,7 +103,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.195,
+      "latency_ms": 1.476,
+      "redundancy@10": 0.1001,
       "n_primary": 2,
       "top": [
         "c4r-0007",
@@ -112,7 +119,8 @@
       "mrr": 0.5,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.17,
+      "latency_ms": 1.427,
+      "redundancy@10": 0.0984,
       "n_primary": 1,
       "top": [
         "sol-StakingRewards.sol",
@@ -127,7 +135,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.227,
+      "latency_ms": 1.451,
+      "redundancy@10": 0.0654,
       "n_primary": 1,
       "top": [
         "c4r-0015",
@@ -142,7 +151,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.217,
+      "latency_ms": 1.465,
+      "redundancy@10": 0.0584,
       "n_primary": 1,
       "top": [
         "rkt-0001",
@@ -157,7 +167,8 @@
       "mrr": 0.5,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.194,
+      "latency_ms": 2.274,
+      "redundancy@10": 0.0525,
       "n_primary": 1,
       "top": [
         "rkt-0001",
@@ -172,7 +183,8 @@
       "mrr": 1.0,
       "recall@10": 0.5,
       "hit@3": 1.0,
-      "latency_ms": 1.324,
+      "latency_ms": 2.576,
+      "redundancy@10": 0.0629,
       "n_primary": 2,
       "top": [
         "rkt-0007",
@@ -187,7 +199,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.151,
+      "latency_ms": 1.506,
+      "redundancy@10": 0.0789,
       "n_primary": 1,
       "top": [
         "rkt-0003",
@@ -202,7 +215,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.257,
+      "latency_ms": 1.46,
+      "redundancy@10": 0.1807,
       "n_primary": 1,
       "top": [
         "sol-VulnerableVault.sol",
@@ -217,7 +231,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.212,
+      "latency_ms": 1.423,
+      "redundancy@10": 0.1701,
       "n_primary": 1,
       "top": [
         "sol-LendingOracle.sol",
@@ -232,7 +247,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.168,
+      "latency_ms": 1.557,
+      "redundancy@10": 0.1554,
       "n_primary": 1,
       "top": [
         "sol-NaiveBridge.sol",
@@ -247,7 +263,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.199,
+      "latency_ms": 1.453,
+      "redundancy@10": 0.2163,
       "n_primary": 1,
       "top": [
         "sol-VulnerableVault.sol",
@@ -262,7 +279,8 @@
       "mrr": 1.0,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.188,
+      "latency_ms": 1.38,
+      "redundancy@10": 0.0889,
       "n_primary": 1,
       "top": [
         "pdf-sb03-p3",
@@ -277,7 +295,8 @@
       "mrr": 0.5,
       "recall@10": 1.0,
       "hit@3": 1.0,
-      "latency_ms": 1.064,
+      "latency_ms": 1.213,
+      "redundancy@10": 0.046,
       "n_primary": 1,
       "top": [
         "pdf-sb02-p1",

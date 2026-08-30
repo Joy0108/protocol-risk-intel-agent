@@ -18,6 +18,12 @@
       "rerank_backend": "feature",
       "ce_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
       "rerank_depth": 40,
+      "mmr": false,
+      "mmr_lambda": 0.7,
+      "mmr_depth": 30,
+      "contextual_chunks": false,
+      "multi_query": false,
+      "max_subqueries": 4,
       "use_hyde": false,
       "quantize": true,
       "semantic_cache": true,
@@ -48,6 +54,7 @@
     "recall@10": 0.9211,
     "hit@3": 1.0,
     "lexical_code_mrr": 0.875,
+    "redundancy@10": 0.1038,
     "by_archetype": {
       "code_diagnostic": {
         "n": 4,
@@ -111,9 +118,9 @@
   "serving": {
     "latency": {
       "n": 40,
-      "p50_ms": 1.16,
-      "p95_ms": 1.48,
-      "mean_ms": 0.87,
+      "p50_ms": 1.39,
+      "p95_ms": 2.6,
+      "mean_ms": 1.22,
       "cache": {
         "hits": 19,
         "misses": 21,

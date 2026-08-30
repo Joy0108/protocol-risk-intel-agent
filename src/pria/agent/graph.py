@@ -1,4 +1,15 @@
-"""A small state-machine engine with the LangGraph execution semantics.
+"""The reference engine: the same graph, walked without a dependency.
+
+LangGraph is the production executor (``langgraph_engine.py``). This walker
+exists for two reasons, and neither is nostalgia:
+
+1. **It keeps the default install small.** ``pip install pria`` gives you the
+   retrieval stack, the Solidity span extractor and the evaluation harness on
+   numpy alone. Orchestration is a ``[graph]`` extra.
+2. **It is the control in the conformance test.** Two independent executors
+   over one declared topology, asserted to produce the same path, the same memo
+   and the same citations, is a stronger statement about the agent than either
+   engine passing its own tests.
 
 Nodes are pure functions ``state -> partial_state``; the returned mapping is
 merged into the state rather than replacing it. Edges are either static or
@@ -14,21 +25,23 @@ from __future__ import annotations
 
 import copy
 import time
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
 from ..tracing import current
+from .spec import END, START, AgentSpec, GraphError, NodeFn, RouterFn
 
-START = "__start__"
-END = "__end__"
-
-NodeFn = Callable[[dict[str, Any]], Mapping[str, Any] | None]
-RouterFn = Callable[[dict[str, Any]], str]
-
-
-class GraphError(RuntimeError):
-    pass
+__all__ = [
+    "END",
+    "START",
+    "AgentSpec",
+    "Checkpoint",
+    "GraphError",
+    "NodeFn",
+    "RouterFn",
+    "StateGraph",
+]
 
 
 @dataclass
@@ -40,85 +53,64 @@ class Checkpoint:
     state_keys: list[str]
     snapshot: dict[str, Any] = field(default_factory=dict)
 
+    def to_dict(self) -> dict[str, Any]:
+        return {"step": self.step, "node": self.node, "next": self.next_node,
+                "duration_ms": self.duration_ms, "state_keys": self.state_keys}
+
 
 class StateGraph:
-    def __init__(self, name: str = "graph", max_steps: int = 32, keep_snapshots: bool = False):
-        self.name = name
-        self.max_steps = max_steps
-        self.keep_snapshots = keep_snapshots
-        self._nodes: dict[str, NodeFn] = {}
-        self._edges: dict[str, str] = {}
-        self._conditional: dict[str, tuple[RouterFn, dict[str, str]]] = {}
-        self._entry: str | None = None
+    """Walks an :class:`AgentSpec` directly."""
 
-    # -- construction ------------------------------------------------------
+    engine = "reference"
+
+    def __init__(self, name: str = "graph", max_steps: int = 32, keep_snapshots: bool = False,
+                 spec: AgentSpec | None = None):
+        self.spec = spec or AgentSpec(name=name, max_steps=max_steps)
+        self.name = self.spec.name
+        self.max_steps = self.spec.max_steps
+        self.keep_snapshots = keep_snapshots
+
+    @classmethod
+    def from_spec(cls, spec: AgentSpec, keep_snapshots: bool = False) -> StateGraph:
+        return cls(spec.name, spec.max_steps, keep_snapshots, spec=spec)
+
+    # -- construction (delegates; the topology has one home) ---------------
     def add_node(self, name: str, fn: NodeFn) -> StateGraph:
-        if name in {START, END}:
-            raise GraphError(f"{name} is reserved")
-        if name in self._nodes:
-            raise GraphError(f"duplicate node {name!r}")
-        self._nodes[name] = fn
+        self.spec.add_node(name, fn)
         return self
 
     def add_edge(self, src: str, dst: str) -> StateGraph:
-        if src == START:
-            self._entry = dst
-            return self
-        self._edges[src] = dst
+        self.spec.add_edge(src, dst)
         return self
 
     def add_conditional_edges(self, src: str, router: RouterFn, mapping: dict[str, str]) -> StateGraph:
-        self._conditional[src] = (router, mapping)
+        self.spec.add_conditional_edges(src, router, mapping)
         return self
 
     def set_entry_point(self, name: str) -> StateGraph:
-        self._entry = name
+        self.spec.set_entry_point(name)
         return self
 
     def validate(self) -> None:
-        if self._entry is None:
-            raise GraphError("no entry point")
-        known = set(self._nodes) | {END}
-        for src, dst in self._edges.items():
-            if src not in self._nodes:
-                raise GraphError(f"edge from unknown node {src!r}")
-            if dst not in known:
-                raise GraphError(f"edge to unknown node {dst!r}")
-        for src, (_router, mapping) in self._conditional.items():
-            if src not in self._nodes:
-                raise GraphError(f"conditional edge from unknown node {src!r}")
-            for dst in mapping.values():
-                if dst not in known:
-                    raise GraphError(f"conditional edge to unknown node {dst!r}")
-        if self._entry not in self._nodes:
-            raise GraphError(f"entry point {self._entry!r} is not a node")
+        self.spec.validate()
 
     # -- execution ---------------------------------------------------------
-    def _next(self, node: str, state: dict[str, Any]) -> str:
-        if node in self._conditional:
-            router, mapping = self._conditional[node]
-            key = router(state)
-            if key not in mapping:
-                raise GraphError(f"router for {node!r} returned unmapped key {key!r}")
-            return mapping[key]
-        return self._edges.get(node, END)
-
-    def invoke(self, state: dict[str, Any]) -> dict[str, Any]:
+    def invoke(self, state: Mapping[str, Any], thread_id: str | None = None) -> dict[str, Any]:
         self.validate()
         tracer = current()
         state = dict(state)
         state.setdefault("_checkpoints", [])
         state.setdefault("_path", [])
 
-        node = self._entry
+        node = self.spec.entry
         assert node is not None
         steps = 0
 
-        with tracer.span("graph", graph=self.name) as gspan:
+        with tracer.span("graph", graph=self.name, engine=self.engine):
             while node != END:
                 if steps >= self.max_steps:
                     raise GraphError(f"{self.name} exceeded max_steps={self.max_steps}; path={state['_path']}")
-                fn = self._nodes.get(node)
+                fn = self.spec.nodes.get(node)
                 if fn is None:
                     raise GraphError(f"unknown node {node!r}")
 
@@ -131,7 +123,7 @@ class StateGraph:
                     nspan["attributes"]["updated"] = sorted(update.keys())
 
                 duration = (time.perf_counter() - started) * 1000
-                nxt = self._next(node, state)
+                nxt = self.spec.next_after(node, state)
                 state["_path"].append(node)
                 state["_checkpoints"].append(
                     Checkpoint(
@@ -139,26 +131,29 @@ class StateGraph:
                         node=node,
                         next_node=nxt,
                         duration_ms=round(duration, 3),
-                        state_keys=sorted(k for k in state if not k.startswith("_")),
+                        state_keys=sorted(update),
                         snapshot=copy.deepcopy({k: v for k, v in state.items() if not k.startswith("_")})
-                        if self.keep_snapshots
-                        else {},
+                        if self.keep_snapshots else {},
                     )
                 )
                 node = nxt
                 steps += 1
 
-            gspan["attributes"]["steps"] = steps
-            gspan["attributes"]["path"] = list(state["_path"])
-
         state["_steps"] = steps
+        state["_engine"] = self.engine
+        state["_thread_id"] = thread_id
         return state
 
     def to_mermaid(self) -> str:
-        lines = ["graph TD", f"    {START}([start]) --> {self._entry}"]
-        for src, dst in self._edges.items():
-            lines.append(f"    {src} --> {dst}")
-        for src, (_router, mapping) in self._conditional.items():
-            for key, dst in mapping.items():
-                lines.append(f"    {src} -->|{key}| {dst}")
-        return "\n".join(lines)
+        return self.spec.to_mermaid()
+
+
+def audit_trail(state: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """The path from question to memo, as a reviewer would read it.
+
+    Accepts either engine's checkpoints: the walker records :class:`Checkpoint`
+    objects, LangGraph's instrumented nodes record plain dicts so the
+    checkpointer can serialise them.
+    """
+    return [c.to_dict() if isinstance(c, Checkpoint) else dict(c)
+            for c in state.get("_checkpoints", [])]
